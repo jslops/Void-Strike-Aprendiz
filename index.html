@@ -46,13 +46,13 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
 .review-item.ok{border-left-color:#3aa55a}
 .review-item.bad{border-left-color:#a53a3a}
 .review-item .rt{color:#ffcc66;font-weight:700;font-size:11px;letter-spacing:1px}
-#touch-controls{position:absolute;inset:0;display:none;z-index:5;pointer-events:none}
+#touch-controls{position:absolute;inset:0;display:none;z-index:5;pointer-events:none;touch-action:none}
 #touch-controls.active{display:block}
-.tc-zone{position:absolute;pointer-events:auto}
+.tc-zone{position:absolute;pointer-events:auto;touch-action:none}
 #joy-zone{left:0;bottom:0;width:50%;height:55%}
-#fire-btn{right:20px;bottom:24px;width:82px;height:82px;border-radius:50%;background:rgba(60,140,255,.28);border:2px solid rgba(120,200,255,.65);display:flex;align-items:center;justify-content:center;color:#cfe8ff;font-size:11px;font-weight:700;letter-spacing:1px;pointer-events:auto;user-select:none}
-#special-btn{right:118px;bottom:34px;width:64px;height:64px;border-radius:50%;background:rgba(255,180,60,.25);border:2px solid rgba(255,200,100,.6);display:flex;align-items:center;justify-content:center;color:#ffe0a0;font-size:9px;font-weight:700;pointer-events:auto;letter-spacing:1px;text-align:center;line-height:1.1;padding:4px}
-#pause-btn{right:12px;top:12px;width:40px;height:40px;border-radius:6px;background:rgba(20,40,70,.75);border:1px solid #3a7acc;display:flex;align-items:center;justify-content:center;color:#a0d0ff;font-size:15px;pointer-events:auto;cursor:pointer}
+#fire-btn{right:20px;bottom:24px;width:82px;height:82px;border-radius:50%;background:rgba(60,140,255,.28);border:2px solid rgba(120,200,255,.65);display:flex;align-items:center;justify-content:center;color:#cfe8ff;font-size:11px;font-weight:700;letter-spacing:1px;pointer-events:auto;user-select:none;touch-action:none}
+#special-btn{right:118px;bottom:34px;width:64px;height:64px;border-radius:50%;background:rgba(255,180,60,.25);border:2px solid rgba(255,200,100,.6);display:flex;align-items:center;justify-content:center;color:#ffe0a0;font-size:9px;font-weight:700;pointer-events:auto;letter-spacing:1px;text-align:center;line-height:1.1;padding:4px;touch-action:none}
+#pause-btn{right:12px;top:12px;width:40px;height:40px;border-radius:6px;background:rgba(20,40,70,.75);border:1px solid #3a7acc;display:flex;align-items:center;justify-content:center;color:#a0d0ff;font-size:15px;pointer-events:auto;cursor:pointer;touch-action:none}
 #joy-base{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(120,200,255,.4);background:rgba(30,60,120,.18);display:none;pointer-events:none;transform:translate(-50%,-50%)}
 #joy-knob{position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(90,170,255,.55);border:2px solid rgba(160,220,255,.85);pointer-events:none;transform:translate(-50%,-50%);display:none;box-shadow:0 0 15px rgba(80,180,255,.5)}
 .rotate-msg{position:absolute;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;text-align:center;padding:30px;z-index:100;color:#8fd4ff;font-size:clamp(15px,3vw,20px);letter-spacing:2px;line-height:1.6;pointer-events:auto;touch-action:none}
@@ -108,7 +108,7 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
       <h2>INSTRUÇÕES DE VOO</h2>
       <div class="q-panel" style="text-align:left;font-size:12px;line-height:1.6;color:#c8dcf0">
         <p><strong style="color:#8fd4ff">TECLADO:</strong> WASD/setas movem · Espaço dispara · Shift precisão · X especial · C troca tipo de especial · P/Esc pausa</p>
-        <p><strong style="color:#8fd4ff">GAMEPAD:</strong> Analógico esquerdo move · A/① dispara · B/② especial · Start pausa</p>
+        <p><strong style="color:#8fd4ff">GAMEPAD:</strong> Analógico esquerdo/D-Pad move · A/① dispara · B/② especial · X/□ troca especial · LT precisão · Start pausa</p>
         <p><strong style="color:#8fd4ff">TOUCH (paisagem):</strong> Arraste na área esquerda para mover · FOGO atira · ESPECIAL alterna tipos automaticamente</p>
         <p><strong style="color:#ffcc66">MISSÕES:</strong> Cada setor tem 2 ondas + 1 chefe. Ao destruir o chefe, uma questão educativa surge. Acertar concede <strong>+1 nível de arma</strong>, <strong>+1 armadura</strong> e <strong>+1 carga especial</strong>.</p>
         <p><strong style="color:#8fd4ff">POWERUPS:</strong> <span style="color:#66ff88">■</span> arma · <span style="color:#66aaff">■</span> escudo · <span style="color:#ffaa44">■</span> armadura · <span style="color:#ff8844">■</span> energia · <span style="color:#ff66aa">■</span> vida</p>
@@ -168,8 +168,8 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
 <script>
 "use strict";
 /* ============================================================
-   VOID STRIKE: DESBLOQUEIE SEU FUTURO — Edição Paisagem v2
-   Ondas por formação · Boss a cada 3 encontros · Recompensa por acerto
+   VOID STRIKE: DESBLOQUEIE SEU FUTURO — Edição Paisagem v3
+   Touch mobile + Gamepad físico + Bosses únicos
    ============================================================ */
 const W = 960, H = 600;
 const canvas = document.getElementById('game');
@@ -328,8 +328,6 @@ const SECTORS = [
   { name:"ZONA INDUSTRIAL ESPACIAL", bg:'industrial', accent:'#5aaa7a' }
 ];
 
-// 8 setores · 2 ondas normais + 1 chefe por setor
-// => chefe a cada 3 encontros (= "onda 3, 6, 9...")
 const STAGES = [
   { sector:0, waves:['line','wave'],  boss:'guardian' },
   { sector:0, waves:['v','line'],     boss:'guardian' },
@@ -341,7 +339,6 @@ const STAGES = [
   { sector:3, waves:['v','line'],     boss:'final' }
 ];
 
-// Composição das ondas por setor (dificuldade crescente)
 const WAVE_POOLS = [
   [['interceptor','interceptor','interceptor','interceptor'],
    ['interceptor','assault','interceptor','assault']],
@@ -370,7 +367,6 @@ const ENEMY_STATS = {
   asteroid:{hp:3,speed:90,score:80,r:20,fire:0,color:'#a08060'}
 };
 
-// ---------- Formações ----------
 function buildWaveQueue(stageIdx, waveIdx){
   const s = Math.min(stageIdx, WAVE_POOLS.length-1);
   const w = Math.min(waveIdx, 1);
@@ -427,8 +423,20 @@ const Input = {
     });
     window.addEventListener('keyup', e=>{ this.keys[e.key]=false; });
     window.addEventListener('blur', ()=>{ this.keys={}; this.fire=false; this.special=false; });
-    window.addEventListener('gamepadconnected', e=>{ this.gamepadIndex=e.gamepad.index; });
-    window.addEventListener('gamepaddisconnected', e=>{ if(this.gamepadIndex===e.gamepad.index) this.gamepadIndex=null; });
+    window.addEventListener('gamepadconnected', e=>{
+      this.gamepadIndex=e.gamepad.index;
+      if(typeof Game !== 'undefined' && Game.state==='playing'){
+        Game.flashMsg = 'GAMEPAD CONECTADO';
+        Game.flashTimer = 2.0;
+      }
+    });
+    window.addEventListener('gamepaddisconnected', e=>{
+      if(this.gamepadIndex===e.gamepad.index) this.gamepadIndex=null;
+      if(typeof Game !== 'undefined' && Game.state==='playing'){
+        Game.flashMsg = 'GAMEPAD DESCONECTADO';
+        Game.flashTimer = 2.0;
+      }
+    });
     window.addEventListener('pointerdown', ()=>AudioSys.init(), {once:true});
     window.addEventListener('keydown', ()=>AudioSys.init(), {once:true});
     this.setupTouch();
@@ -517,10 +525,12 @@ const Input = {
       }
     };
 
-    canvas.addEventListener('touchstart', onStart, {passive:false});
-    canvas.addEventListener('touchmove', onMove, {passive:false});
-    canvas.addEventListener('touchend', onEnd, {passive:true});
-    canvas.addEventListener('touchcancel', onEnd, {passive:true});
+    // Listeners em document (não em canvas) para capturar toques
+    // mesmo quando iniciam sobre os botões/joy-zone
+    document.addEventListener('touchstart', onStart, {passive:false});
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onEnd, {passive:true});
+    document.addEventListener('touchcancel', onEnd, {passive:true});
   },
 
   update(){
@@ -530,24 +540,34 @@ const Input = {
     if(this.keys['ArrowUp']||this.keys['w']||this.keys['W']) ky-=1;
     if(this.keys['ArrowDown']||this.keys['s']||this.keys['S']) ky+=1;
 
-    let gx=0, gy=0, gFire=false, gSpecial=false, gPause=false;
+    let gx=0, gy=0, gFire=false, gSpecial=false, gPause=false, gCycle=false, gPrecision=false;
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-    for(const gp of pads){
-      if(!gp) continue;
+    let gp = null;
+    if(this.gamepadIndex !== null && pads[this.gamepadIndex]) gp = pads[this.gamepadIndex];
+    else {
+      for(const p of pads){ if(p){ gp = p; this.gamepadIndex = p.index; break; } }
+    }
+    if(gp){
       const dz = 0.25;
-      if(Math.abs(gp.axes[0])>dz) gx = gp.axes[0];
-      if(Math.abs(gp.axes[1])>dz) gy = gp.axes[1];
+      if(Math.abs(gp.axes[0]||0) > dz) gx = gp.axes[0];
+      if(Math.abs(gp.axes[1]||0) > dz) gy = gp.axes[1];
       if(gp.buttons[14] && gp.buttons[14].pressed) gx=-1;
       if(gp.buttons[15] && gp.buttons[15].pressed) gx=1;
       if(gp.buttons[12] && gp.buttons[12].pressed) gy=-1;
       if(gp.buttons[13] && gp.buttons[13].pressed) gy=1;
       if(gp.buttons[0] && gp.buttons[0].pressed) gFire=true;
       if(gp.buttons[1] && gp.buttons[1].pressed) gSpecial=true;
+      if(gp.buttons[2] && gp.buttons[2].pressed) gCycle=true;
+      if(gp.buttons[3] && gp.buttons[3].pressed) gCycle=true;
       if(gp.buttons[9] && gp.buttons[9].pressed) gPause=true;
-      break;
+      if(gp.buttons[6] && gp.buttons[6].pressed) gPrecision=true;
     }
+
     if(gPause){ if(!this.gamepadPrev.pause) this.justPressed['pause']=true; this.gamepadPrev.pause=true; }
     else this.gamepadPrev.pause=false;
+
+    if(gCycle){ if(!this.gamepadPrev.cycle){ this.justPressed['c']=true; this.gamepadPrev.cycle=true; } }
+    else this.gamepadPrev.cycle=false;
 
     if(Math.abs(gx)>0.05) kx=gx;
     if(Math.abs(gy)>0.05) ky=gy;
@@ -569,7 +589,7 @@ const Input = {
     if(this.keys['Enter'] && !this._enterHeld){ this.justPressed['enter']=true; this._enterHeld=true; }
     else if(!this.keys['Enter']) this._enterHeld=false;
 
-    this.defense = !!(this.keys['Shift']);
+    this.defense = !!(this.keys['Shift'] || gPrecision);
   },
   consume(k){ const v=this.justPressed[k]; this.justPressed[k]=false; return v; },
   clearJust(){ this.justPressed={}; }
@@ -627,8 +647,9 @@ const Game = {
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     const map = { menu:'menu-screen', instr:'instr-screen', question:'question-screen', paused:'pause-screen', gameover:'gameover-screen', victory:'victory-screen', review:'review-screen' };
     if(map[name]) document.getElementById(map[name]).classList.add('active');
-    document.getElementById('touch-controls').classList.toggle('active', name==='playing');
-    this.touchEnabled = name==='playing';
+    const isPlaying = name === 'playing';
+    this.touchEnabled = isPlaying;
+    document.getElementById('touch-controls').classList.toggle('active', isPlaying && Input.isTouch);
   },
 
   updateMenuRecord(){
@@ -789,7 +810,6 @@ const Game = {
         if(this.waveIndex < stage.waves.length){
           this.spawnWave();
         } else {
-          // 2 ondas concluídas → invoca o chefe (3º encontro do setor)
           this.waveState='boss';
           this.spawnBoss(stage.boss, this.stageIndex);
         }
@@ -854,7 +874,6 @@ const Game = {
     const p = this.player; const lvl = this.weaponLevel;
     AudioSys.shoot();
     if(this.weaponType===0){
-      // Concentrado: núcleo + barris laterais conforme o nível
       this.bullets.push({x:p.x, y:p.y-24, vx:0, vy:-720, r:4, dmg:2, type:'player', color:'#8fd4ff'});
       if(lvl>=2) this.bullets.push({x:p.x-10, y:p.y-20, vx:0, vy:-700, r:3.5, dmg:1, type:'player', color:'#cfe8ff'});
       if(lvl>=2) this.bullets.push({x:p.x+10, y:p.y-20, vx:0, vy:-700, r:3.5, dmg:1, type:'player', color:'#cfe8ff'});
@@ -864,7 +883,6 @@ const Game = {
       if(lvl>=5){ this.bullets.push({x:p.x-8, y:p.y-28, vx:0, vy:-760, r:3.5, dmg:1, type:'player', color:'#cfe8ff'}); this.bullets.push({x:p.x+8, y:p.y-28, vx:0, vy:-760, r:3.5, dmg:1, type:'player', color:'#cfe8ff'}); }
       if(lvl>=6){ this.bullets.push({x:p.x, y:p.y-34, vx:0, vy:-820, r:5, dmg:3, type:'player', color:'#ffffff'}); }
     } else if(this.weaponType===1){
-      // Leque
       const n = Math.min(3 + Math.floor(lvl/2), 7);
       const dmg = lvl>=5 ? 2 : 1;
       for(let i=0;i<n;i++){
@@ -872,7 +890,6 @@ const Game = {
         this.bullets.push({x:p.x,y:p.y-20,vx:Math.cos(a)*700,vy:Math.sin(a)*700,r:4,dmg,type:'player',color:'#8fffc0'});
       }
     } else {
-      // Mísseis teleguiados
       const n = lvl>=5 ? 3 : (lvl>=3 ? 2 : 1);
       for(let i=0;i<n;i++){
         const off = (i - (n-1)/2) * 14;
@@ -898,7 +915,6 @@ const Game = {
     if(type===0) this.specialNova();
     else if(type===1) this.specialLaser();
     else this.specialTimeWarp();
-    // Auto-ciclo no touch (sem tecla C)
     if(Input.isTouch){
       const list = this.getAvailableSpecials();
       if(list.length > 1) this.specialCycle = (this.specialCycle + 1) % list.length;
@@ -1018,6 +1034,7 @@ const Game = {
     const scale = 1 + (stageIdx || 0) * 0.22;
     const hp = Math.floor(cfg.hp * scale);
     this.boss = {
+      type:name,
       name:cfg.name, x:W/2, y:-80, hp, maxHp:hp, r:cfg.r, color:cfg.color,
       age:0, phase:0, attackTimer:1.5, attackIndex:0, patterns:cfg.patterns,
       dead:false, entering:true, angle:0
@@ -1114,7 +1131,6 @@ const Game = {
 
   hitPlayer(){
     if(this.invuln>0 || this.shieldTime>0) return;
-    // Armadura absorve primeiro
     if(this.armor > 0){
       this.armor--;
       this.invuln = 1.0;
@@ -1263,15 +1279,12 @@ const Game = {
     if(ok){
       qs.completed=true; qs.wrongOnce=false;
       AudioSys.correct();
-      // -------- Recompensa por acerto --------
       this.weaponLevel = Math.min(MAX_WEAPON_LEVEL, this.weaponLevel + 1);
       this.armor = Math.min(MAX_ARMOR, this.armor + 1);
       this.specialEnergy = Math.min(MAX_SPECIAL_ENERGY, this.specialEnergy + 1);
       this.correctCount++;
-      // Desbloqueia tipos de arma
       if(this.correctCount >= 3) this.weaponTypesUnlocked[1] = true;
       if(this.correctCount >= 5) this.weaponTypesUnlocked[2] = true;
-      // Desbloqueia especiais
       if(this.correctCount >= 2) this.specialUnlocked[1] = true;
       if(this.correctCount >= 4) this.specialUnlocked[2] = true;
       this.pendingRewardFlash = true;
@@ -1616,18 +1629,367 @@ const Game = {
     }
   },
 
+  // ========== BOSSES ÚNICOS ==========
   drawBoss(b){
-    ctx.save(); ctx.translate(b.x, b.y);
+    ctx.save();
+    ctx.translate(b.x, b.y);
     const t = this.time;
     const pulse = 1 + Math.sin(t*3)*0.03;
     ctx.scale(pulse, pulse);
+    switch(b.type){
+      case 'guardian':  this.drawBossGuardian(b); break;
+      case 'destroyer': this.drawBossDestroyer(b); break;
+      case 'sentinel':  this.drawBossSentinel(b); break;
+      case 'final':     this.drawBossFinal(b); break;
+      default:          this.drawBossGeneric(b); break;
+    }
+    ctx.restore();
+  },
 
-    const auraG = ctx.createRadialGradient(0,0,b.r*0.5,0,0,b.r*1.6);
-    auraG.addColorStop(0,'rgba(80,160,255,0)');
-    auraG.addColorStop(0.7,'rgba(80,160,255,0.15)');
-    auraG.addColorStop(1,'rgba(80,160,255,0)');
-    ctx.fillStyle = auraG; ctx.beginPath(); ctx.arc(0,0,b.r*1.6,0,TAU); ctx.fill();
+  // Guardião Orbital: mecânico com anéis rotativos
+  drawBossGuardian(b){
+    const t = this.time;
+    const phaseColor = b.phase===0 ? '#66ccff' : b.phase===1 ? '#ffcc44' : '#ff4466';
 
+    // Aura
+    const aura = ctx.createRadialGradient(0,0,b.r*0.5,0,0,b.r*1.6);
+    aura.addColorStop(0,'rgba(74,154,224,0)');
+    aura.addColorStop(0.7,'rgba(74,154,224,0.15)');
+    aura.addColorStop(1,'rgba(74,154,224,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(0,0,b.r*1.6,0,TAU); ctx.fill();
+
+    // Anel externo rotativo com canhões
+    ctx.save();
+    ctx.rotate(b.angle * 0.5);
+    ctx.strokeStyle = 'rgba(100,180,255,0.55)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0,0,b.r*1.08,0,TAU); ctx.stroke();
+    for(let i=0;i<4;i++){
+      const a = i/4*TAU;
+      const cx = Math.cos(a)*b.r*1.08, cy = Math.sin(a)*b.r*1.08;
+      ctx.fillStyle = '#2a4a6a';
+      ctx.beginPath(); ctx.arc(cx,cy,9,0,TAU); ctx.fill();
+      ctx.strokeStyle='#8fc4ff'; ctx.lineWidth=1.2; ctx.stroke();
+      ctx.fillStyle = phaseColor;
+      ctx.beginPath(); ctx.arc(cx,cy,3.5,0,TAU); ctx.fill();
+    }
+    ctx.restore();
+
+    // Anel interno contra-rotativo
+    ctx.save();
+    ctx.rotate(-b.angle * 0.3);
+    ctx.strokeStyle = 'rgba(80,160,220,0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0,0,b.r*0.88,0,TAU); ctx.stroke();
+    ctx.restore();
+
+    // Corpo hexagonal
+    ctx.save();
+    ctx.rotate(t * 0.15);
+    const hull = ctx.createRadialGradient(0,0,b.r*0.1,0,0,b.r*0.72);
+    hull.addColorStop(0,'#a0d0ff');
+    hull.addColorStop(0.5,'#2a5a8a');
+    hull.addColorStop(1,'#0a1a30');
+    ctx.fillStyle = hull;
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const a = i/6*TAU - Math.PI/2;
+      const x = Math.cos(a)*b.r*0.72, y = Math.sin(a)*b.r*0.72;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#a0d0ff'; ctx.lineWidth=2; ctx.stroke();
+    ctx.strokeStyle='rgba(180,220,255,0.35)';
+    ctx.lineWidth=1;
+    for(let i=0;i<6;i++){
+      const a = i/6*TAU - Math.PI/2;
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.lineTo(Math.cos(a)*b.r*0.72, Math.sin(a)*b.r*0.72);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Olho central
+    const core = ctx.createRadialGradient(0,0,0,0,0,b.r*0.4);
+    core.addColorStop(0,'#ffffff');
+    core.addColorStop(0.4,phaseColor);
+    core.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = core;
+    ctx.beginPath(); ctx.arc(0,0,b.r*0.4*(1+Math.sin(t*6)*0.1),0,TAU); ctx.fill();
+    ctx.fillStyle = '#0a1a2a';
+    ctx.beginPath(); ctx.arc(0,0,b.r*0.08,0,TAU); ctx.fill();
+  },
+
+  // Destruidor de Asteroides: corpo angular com garras e broca
+  drawBossDestroyer(b){
+    const t = this.time;
+    const phaseColor = b.phase===0 ? '#ffaa44' : b.phase===1 ? '#ff6644' : '#ff2244';
+
+    const aura = ctx.createRadialGradient(0,0,b.r*0.5,0,0,b.r*1.5);
+    aura.addColorStop(0,'rgba(192,138,74,0)');
+    aura.addColorStop(0.7,'rgba(192,138,74,0.18)');
+    aura.addColorStop(1,'rgba(192,138,74,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(0,0,b.r*1.5,0,TAU); ctx.fill();
+
+    // Braços com garras
+    for(const side of [-1,1]){
+      ctx.save();
+      ctx.translate(side*b.r*0.9, 0);
+      ctx.scale(side,1);
+      ctx.rotate(Math.sin(t*2 + (side>0?1:0))*0.15);
+      // Braço
+      ctx.fillStyle = '#3a2a1a';
+      ctx.strokeStyle = '#a08050';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0,-12); ctx.lineTo(22,-16); ctx.lineTo(28,0);
+      ctx.lineTo(22,16); ctx.lineTo(0,12); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Garra
+      ctx.fillStyle = '#5a4030';
+      ctx.beginPath();
+      ctx.moveTo(22,-16); ctx.lineTo(40,-22); ctx.lineTo(34,-6); ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(22,16); ctx.lineTo(40,22); ctx.lineTo(34,6); ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Corpo principal angular
+    const hull = ctx.createLinearGradient(-b.r,0,b.r,0);
+    hull.addColorStop(0,'#2a1a0a');
+    hull.addColorStop(0.3,'#8a6a3a');
+    hull.addColorStop(0.5,'#c0a060');
+    hull.addColorStop(0.7,'#8a6a3a');
+    hull.addColorStop(1,'#2a1a0a');
+    ctx.fillStyle = hull;
+    ctx.beginPath();
+    ctx.moveTo(0,b.r*0.9);
+    ctx.lineTo(-b.r*0.6,b.r*0.45);
+    ctx.lineTo(-b.r*0.95,-b.r*0.2);
+    ctx.lineTo(-b.r*0.65,-b.r*0.8);
+    ctx.lineTo(0,-b.r*0.55);
+    ctx.lineTo(b.r*0.65,-b.r*0.8);
+    ctx.lineTo(b.r*0.95,-b.r*0.2);
+    ctx.lineTo(b.r*0.6,b.r*0.45);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle='#d0a060'; ctx.lineWidth=2; ctx.stroke();
+
+    // Placas de armadura
+    ctx.fillStyle='rgba(40,20,10,0.6)';
+    ctx.fillRect(-b.r*0.5,-b.r*0.3, b.r*0.34, b.r*0.6);
+    ctx.fillRect(b.r*0.16,-b.r*0.3, b.r*0.34, b.r*0.6);
+    ctx.fillRect(-b.r*0.2, b.r*0.35, b.r*0.4, b.r*0.18);
+
+    // Broca rotativa
+    ctx.save();
+    ctx.translate(0,-b.r*0.75);
+    ctx.rotate(t*10);
+    ctx.fillStyle='#d0c0a0';
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const a = i/6*TAU;
+      const x = Math.cos(a)*13, y = Math.sin(a)*13;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#8a6a3a'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.restore();
+
+    // Olhos laterais
+    for(const side of [-1,1]){
+      const ex = side*b.r*0.32, ey = b.r*0.05;
+      const eg = ctx.createRadialGradient(ex,ey,0,ex,ey,14);
+      eg.addColorStop(0,'#ffffff');
+      eg.addColorStop(0.35,phaseColor);
+      eg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = eg;
+      ctx.beginPath();
+      ctx.arc(ex,ey,14*(1+Math.sin(t*6+side)*0.12),0,TAU);
+      ctx.fill();
+    }
+  },
+
+  // Sentinela da Nebulosa: orgânica com tentáculos e múltiplos olhos
+  drawBossSentinel(b){
+    const t = this.time;
+    const phaseColor = b.phase===0 ? '#ff88ff' : b.phase===1 ? '#ff4466' : '#ffaa44';
+
+    // Aura mística
+    const aura = ctx.createRadialGradient(0,0,b.r*0.3,0,0,b.r*1.8);
+    aura.addColorStop(0,'rgba(160,90,208,0.35)');
+    aura.addColorStop(0.5,'rgba(160,90,208,0.1)');
+    aura.addColorStop(1,'rgba(160,90,208,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(0,0,b.r*1.8,0,TAU); ctx.fill();
+
+    // Tentáculos
+    for(let i=0;i<8;i++){
+      const baseA = i/8*TAU + b.angle*0.1;
+      const bx = Math.cos(baseA)*b.r*0.5, by = Math.sin(baseA)*b.r*0.5;
+      const wave = Math.sin(t*2.5 + i)*0.35;
+      const len = b.r*(0.9 + Math.sin(t*2+i*1.3)*0.08);
+      ctx.strokeStyle = `rgba(160,90,208,${0.5+Math.sin(t*4+i)*0.2})`;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(bx,by);
+      const midX = Math.cos(baseA+wave)*(b.r*0.5+len*0.5);
+      const midY = Math.sin(baseA+wave)*(b.r*0.5+len*0.5);
+      const endX = Math.cos(baseA+wave*2)*(b.r*0.5+len);
+      const endY = Math.sin(baseA+wave*2)*(b.r*0.5+len);
+      ctx.quadraticCurveTo(midX,midY,endX,endY);
+      ctx.stroke();
+      // Ponta brilhante
+      ctx.fillStyle = `rgba(220,160,255,${0.4+Math.sin(t*3+i)*0.3})`;
+      ctx.beginPath(); ctx.arc(endX,endY,4,0,TAU); ctx.fill();
+    }
+
+    // Corpo orgânico
+    const body = ctx.createRadialGradient(0,0,b.r*0.1,0,0,b.r*0.72);
+    body.addColorStop(0,'#e0a0ff');
+    body.addColorStop(0.4,'#a05ad0');
+    body.addColorStop(0.8,'#5a2a80');
+    body.addColorStop(1,'#2a0a40');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    for(let i=0;i<18;i++){
+      const a = i/18*TAU;
+      const r = b.r*0.72*(1 + Math.sin(t*3+i*0.7)*0.06);
+      const x = Math.cos(a)*r, y = Math.sin(a)*r;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle='rgba(220,160,255,0.5)';
+    ctx.lineWidth=1.5; ctx.stroke();
+
+    // Olhos múltiplos flutuantes
+    const eyes = [
+      {a:0, r:0, size:1.3},
+      {a:0.8, r:b.r*0.38, size:0.7},
+      {a:0.8+TAU/3, r:b.r*0.38, size:0.7},
+      {a:0.8+2*TAU/3, r:b.r*0.38, size:0.7},
+      {a:Math.PI*1.15, r:b.r*0.52, size:0.55},
+      {a:Math.PI*1.85, r:b.r*0.52, size:0.55}
+    ];
+    for(const e of eyes){
+      const ex = Math.cos(e.a + t*0.3)*e.r;
+      const ey = Math.sin(e.a + t*0.3)*e.r;
+      const eg = ctx.createRadialGradient(ex,ey,0,ex,ey,14*e.size);
+      eg.addColorStop(0,'#ffffff');
+      eg.addColorStop(0.3,phaseColor);
+      eg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = eg;
+      ctx.beginPath();
+      ctx.arc(ex,ey,14*e.size*(1+Math.sin(t*5+e.a)*0.1),0,TAU);
+      ctx.fill();
+      // Pupila
+      ctx.fillStyle = '#1a0a20';
+      ctx.beginPath(); ctx.arc(ex,ey,3.5*e.size,0,TAU); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(ex-1,ey-1,1.2*e.size,0,TAU); ctx.fill();
+    }
+  },
+
+  // Núcleo Alienígena: biomecânico com espinhos e olho pulsante
+  drawBossFinal(b){
+    const t = this.time;
+    const phaseColor = b.phase===0 ? '#ffdd44' : b.phase===1 ? '#ff8844' : '#ff3344';
+
+    // Aura tóxica
+    const aura = ctx.createRadialGradient(0,0,b.r*0.3,0,0,b.r*2);
+    aura.addColorStop(0,'rgba(90,255,170,0.35)');
+    aura.addColorStop(0.5,'rgba(90,255,170,0.12)');
+    aura.addColorStop(1,'rgba(90,255,170,0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(0,0,b.r*2,0,TAU); ctx.fill();
+
+    // Espinhos externos rotativos
+    ctx.save();
+    ctx.rotate(t*0.35);
+    for(let i=0;i<12;i++){
+      const a = i/12*TAU;
+      const innerR = b.r*0.85;
+      const outerR = b.r*(1.2 + Math.sin(t*4+i)*0.08);
+      ctx.fillStyle = 'rgba(90,255,170,0.75)';
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a-0.08)*innerR, Math.sin(a-0.08)*innerR);
+      ctx.lineTo(Math.cos(a)*outerR, Math.sin(a)*outerR);
+      ctx.lineTo(Math.cos(a+0.08)*innerR, Math.sin(a+0.08)*innerR);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Corpo biomecânico
+    const body = ctx.createRadialGradient(0,0,b.r*0.1,0,0,b.r*0.92);
+    body.addColorStop(0,'#c0ffdd');
+    body.addColorStop(0.3,'#5affaa');
+    body.addColorStop(0.6,'#1a8a5a');
+    body.addColorStop(1,'#0a2a1a');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.arc(0,0,b.r*0.92*(1+Math.sin(t*4)*0.03),0,TAU);
+    ctx.fill();
+    ctx.strokeStyle='rgba(200,255,220,0.4)';
+    ctx.lineWidth=1.5; ctx.stroke();
+
+    // Veias / rachaduras
+    ctx.strokeStyle='rgba(20,60,40,0.75)';
+    ctx.lineWidth=2;
+    for(let i=0;i<8;i++){
+      const a = i/8*TAU + Math.sin(t*2+i)*0.3;
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.quadraticCurveTo(
+        Math.cos(a)*b.r*0.5, Math.sin(a)*b.r*0.5,
+        Math.cos(a+0.2)*b.r*0.88, Math.sin(a+0.2)*b.r*0.88
+      );
+      ctx.stroke();
+    }
+
+    // Olho central gigante
+    const core = ctx.createRadialGradient(0,0,0,0,0,b.r*0.42);
+    core.addColorStop(0,'#ffffff');
+    core.addColorStop(0.3,phaseColor);
+    core.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = core;
+    ctx.beginPath();
+    ctx.arc(0,0,b.r*0.42*(1+Math.sin(t*6)*0.1),0,TAU);
+    ctx.fill();
+
+    // Pupila em fenda
+    ctx.fillStyle='#0a0a0a';
+    ctx.beginPath();
+    ctx.ellipse(0,0,b.r*0.08,b.r*0.22,0,0,TAU);
+    ctx.fill();
+
+    // Olhos menores ao redor
+    for(let i=0;i<6;i++){
+      const a = i/6*TAU + t*0.5;
+      const ex = Math.cos(a)*b.r*0.62;
+      const ey = Math.sin(a)*b.r*0.62;
+      ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.beginPath(); ctx.arc(ex,ey,5,0,TAU); ctx.fill();
+      ctx.fillStyle='#1a0a0a';
+      ctx.beginPath(); ctx.arc(ex,ey,2.5,0,TAU); ctx.fill();
+    }
+
+    // Pulso de energia
+    const pulsePhase = (t*0.6) % 1;
+    const pulseR = pulsePhase * b.r * 1.6;
+    ctx.strokeStyle = `rgba(90,255,170,${(1-pulsePhase)*0.5})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0,0,pulseR,0,TAU); ctx.stroke();
+  },
+
+  // Fallback genérico (não usado)
+  drawBossGeneric(b){
     const hullG = ctx.createLinearGradient(-b.r,0,b.r,0);
     hullG.addColorStop(0,'#0a1020'); hullG.addColorStop(0.3,b.color);
     hullG.addColorStop(0.5,'#a0c8e0'); hullG.addColorStop(0.7,b.color); hullG.addColorStop(1,'#0a1020');
@@ -1641,34 +2003,6 @@ const Game = {
     }
     ctx.closePath(); ctx.fill();
     ctx.strokeStyle='#c0e0ff'; ctx.lineWidth=2; ctx.stroke();
-
-    ctx.strokeStyle='rgba(200,230,255,0.5)'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.arc(0,0,b.r*0.72,0,TAU); ctx.stroke();
-
-    for(let i=0;i<4;i++){
-      const a = b.angle*0.5 + i/4*TAU;
-      const tx = Math.cos(a)*b.r*0.72, ty = Math.sin(a)*b.r*0.72;
-      ctx.fillStyle='#2a3a4a'; ctx.beginPath(); ctx.arc(tx,ty,7,0,TAU); ctx.fill();
-      ctx.strokeStyle='#80b0d0'; ctx.lineWidth=1; ctx.stroke();
-      ctx.fillStyle='#ff6644'; ctx.beginPath(); ctx.arc(tx,ty,3,0,TAU); ctx.fill();
-    }
-
-    const coreG = ctx.createRadialGradient(0,0,0,0,0,b.r*0.4);
-    const coreColor = b.phase===0?'#66ccff':b.phase===1?'#ffcc44':'#ff4466';
-    coreG.addColorStop(0,'#ffffff'); coreG.addColorStop(0.4,coreColor);
-    coreG.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle = coreG;
-    ctx.beginPath(); ctx.arc(0,0,b.r*0.42*(1+Math.sin(t*6)*0.1),0,TAU); ctx.fill();
-
-    ctx.strokeStyle='rgba(180,220,255,0.6)'; ctx.lineWidth=1;
-    for(let i=0;i<8;i++){
-      const a = i/8*TAU + b.angle*0.2;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(a)*b.r*0.42, Math.sin(a)*b.r*0.42);
-      ctx.lineTo(Math.cos(a)*b.r*0.7, Math.sin(a)*b.r*0.7);
-      ctx.stroke();
-    }
-    ctx.restore();
   },
 
   drawBossHPBar(){
@@ -1676,8 +2010,12 @@ const Game = {
     const bw = Math.min(720, W-120), bh = 12;
     const bx = (W-bw)/2, by = 100;
     ctx.save();
-    ctx.fillStyle = '#cfe8ff'; ctx.font = 'bold 12px "Segoe UI", Arial'; ctx.textAlign = 'center';
-    ctx.fillText(b.name, W/2, by - 6);
+    ctx.font = 'bold 12px "Segoe UI", Arial';
+    const nameWidth = ctx.measureText(b.name).width;
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(W/2 - nameWidth/2 - 8, by - 20, nameWidth + 16, 16);
+    ctx.fillStyle = '#cfe8ff'; ctx.textAlign = 'center';
+    ctx.fillText(b.name, W/2, by - 7);
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.fillRect(bx-2, by-2, bw+4, bh+4);
     const pct = Math.max(0, b.hp/b.maxHp);
@@ -1788,7 +2126,6 @@ const Game = {
       ctx.strokeRect(W-80, 65, 60, 4);
     }
 
-    // Especial
     ctx.textAlign='left';
     ctx.fillStyle='#ffcc66'; ctx.font='bold 10px "Segoe UI", Arial';
     ctx.fillText('ESPECIAL: '+SPECIAL_NAMES[this.getCurrentSpecialType()], 12, 72);
@@ -1797,26 +2134,19 @@ const Game = {
       ctx.beginPath(); ctx.arc(18+i*14, 82, 4, 0, TAU); ctx.fill();
     }
 
-    // Arma
     ctx.textAlign='right';
     ctx.fillStyle='#8fd4ff'; ctx.font='10px "Segoe UI", Arial';
     ctx.fillText('ARMA: '+WEAPON_TYPE_NAMES[this.weaponType]+' Nv.'+this.weaponLevel, W-12, 72);
 
-    // Armadura
     ctx.fillStyle='#ffcc44'; ctx.font='bold 10px "Segoe UI", Arial';
     ctx.fillText('ARMADURA', W-12, 84);
     for(let i=0;i<Math.min(this.armor, MAX_ARMOR);i++){
       const sx = W-18 - i*10;
       ctx.fillStyle='#ffcc44';
       ctx.beginPath();
-      ctx.moveTo(sx, 90);
-      ctx.lineTo(sx-4, 93);
-      ctx.lineTo(sx-4, 97);
-      ctx.lineTo(sx, 100);
-      ctx.lineTo(sx+4, 97);
-      ctx.lineTo(sx+4, 93);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(sx, 90); ctx.lineTo(sx-4, 93); ctx.lineTo(sx-4, 97);
+      ctx.lineTo(sx, 100); ctx.lineTo(sx+4, 97); ctx.lineTo(sx+4, 93);
+      ctx.closePath(); ctx.fill();
     }
     ctx.restore();
   },
