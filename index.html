@@ -113,7 +113,7 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
         <p><strong style="color:#8fd4ff">TECLADO:</strong> WASD/setas movem · Espaço dispara · Shift precisão · X especial · C troca tipo de especial · P/Esc pausa</p>
         <p><strong style="color:#8fd4ff">GAMEPAD:</strong> Analógico esquerdo/D-Pad move · A/① dispara · B/② especial · X/□ troca especial · LT precisão · Start pausa</p>
         <p><strong style="color:#8fd4ff">TOUCH (paisagem):</strong> Analógico fixo no <strong>canto inferior esquerdo</strong> · FOGO e ESPECIAL no <strong>canto inferior direito</strong> · ESPECIAL alterna tipos automaticamente</p>
-        <p><strong style="color:#ffcc66">MISSÕES:</strong> Cada setor tem 2 ondas + 1 chefe. Ao destruir o chefe, uma questão educativa surge. Acertar concede <strong>+1 nível de arma</strong>, <strong>+1 armadura</strong>, <strong>+1 carga especial</strong> e <strong>desbloqueia um novo especial</strong>.</p>
+        <p><strong style="color:#ffcc66">MISSÕES:</strong> Cada setor tem 3 ondas + 1 chefe. Ao destruir o chefe, uma questão educativa surge. Acertar concede <strong>+1 nível de arma</strong>, <strong>+1 armadura</strong>, <strong>+1 carga especial</strong> e <strong>desbloqueia um novo especial</strong>.</p>
         <p><strong style="color:#8fd4ff">POWERUPS:</strong> <span style="color:#66ff88">■</span> arma · <span style="color:#66aaff">■</span> escudo · <span style="color:#ffaa44">■</span> armadura · <span style="color:#ff8844">■</span> energia · <span style="color:#ff66aa">■</span> vida</p>
         <p><strong style="color:#ffcc66">ESPECIAIS (desbloqueados por etapa):</strong> <span style="color:#8fd4ff">NOVA</span> (limpa tela) · <span style="color:#66ffff">LASER</span> (coluna) · <span style="color:#ff88ff">TEMPO LENTO</span> (desacelera) · <span style="color:#ffff00">OVERDRIVE</span> (cadência dupla) · <span style="color:#aa66ff">BURACO NEGRO</span> (atrai e dano em área) · <span style="color:#66aaff">PULSO ESCUDO</span> (invencibilidade + limpa tiros)</p>
       </div>
@@ -334,33 +334,41 @@ const SECTORS = [
 ];
 
 const STAGES = [
-  { sector:0, waves:['line','wave'],  boss:'guardian' },
-  { sector:0, waves:['v','line'],     boss:'guardian' },
-  { sector:1, waves:['wave','v'],     boss:'destroyer' },
-  { sector:1, waves:['line','wave'],  boss:'destroyer' },
-  { sector:2, waves:['v','line'],     boss:'sentinel' },
-  { sector:2, waves:['wave','v'],     boss:'sentinel' },
-  { sector:3, waves:['line','wave'],  boss:'final' },
-  { sector:3, waves:['v','line'],     boss:'final' }
+  { sector:0, waves:['line','wave','sides'],  boss:'guardian' },
+  { sector:0, waves:['v','line','wave'],     boss:'guardian' },
+  { sector:1, waves:['wave','v','sides'],    boss:'destroyer' },
+  { sector:1, waves:['line','wave','v'],     boss:'destroyer' },
+  { sector:2, waves:['v','line','sides'],    boss:'sentinel' },
+  { sector:2, waves:['wave','v','line'],    boss:'sentinel' },
+  { sector:3, waves:['line','wave','sides'], boss:'final' },
+  { sector:3, waves:['v','line','wave'],    boss:'final' }
 ];
 
 const WAVE_POOLS = [
-  [['interceptor','scout','interceptor','scout'],
-   ['scout','interceptor','assault','scout']],
-  [['interceptor','scout','assault','weaver','interceptor'],
-   ['assault','weaver','scout','interceptor']],
-  [['asteroid','scout','interceptor','weaver','asteroid'],
-   ['assault','bomber','sniper','weaver','scout']],
-  [['bomber','assault','weaver','sniper','shielded'],
-   ['shielded','assault','weaver','sniper','interceptor']],
-  [['elite','weaver','sniper','shielded','assault'],
-   ['shielded','bomber','elite','sniper','weaver']],
-  [['armored','bomber','sniper','weaver','shielded'],
-   ['elite','shielded','assault','armored','sniper']],
-  [['armored','shielded','weaver','sniper','bomber','scout'],
-   ['bomber','elite','shielded','assault','weaver','sniper']],
-  [['elite','shielded','armored','bomber','sniper','weaver'],
-   ['elite','shielded','armored','armored','bomber','sniper','weaver']]
+  [['interceptor','scout','interceptor','scout','scout'],
+   ['scout','interceptor','assault','scout','interceptor','scout'],
+   ['assault','interceptor','scout','flanker','scout','assault']],
+  [['interceptor','scout','assault','weaver','interceptor','scout'],
+   ['assault','weaver','scout','interceptor','flanker','assault'],
+   ['weaver','assault','flanker','interceptor','disruptor','scout','assault']],
+  [['asteroid','scout','interceptor','weaver','asteroid','flanker'],
+   ['assault','bomber','sniper','weaver','scout','asteroid'],
+   ['bomber','weaver','sniper','flanker','disruptor','assault','asteroid']],
+  [['bomber','assault','weaver','sniper','shielded','flanker'],
+   ['shielded','assault','weaver','sniper','interceptor','disruptor'],
+   ['carrier','bomber','shielded','flanker','sniper','weaver','assault']],
+  [['elite','weaver','sniper','shielded','assault','flanker'],
+   ['shielded','bomber','elite','sniper','weaver','disruptor'],
+   ['carrier','elite','weaver','shielded','flanker','sniper','disruptor']],
+  [['armored','bomber','sniper','weaver','shielded','flanker'],
+   ['elite','shielded','assault','armored','sniper','disruptor'],
+   ['carrier','armored','elite','shielded','flanker','bomber','sniper','disruptor']],
+  [['armored','shielded','weaver','sniper','bomber','scout','flanker'],
+   ['bomber','elite','shielded','assault','weaver','sniper','disruptor'],
+   ['carrier','armored','elite','shielded','flanker','bomber','disruptor','sniper']],
+  [['elite','shielded','armored','bomber','sniper','weaver','flanker'],
+   ['elite','shielded','armored','armored','bomber','sniper','weaver','disruptor'],
+   ['carrier','elite','shielded','armored','flanker','bomber','disruptor','sniper','weaver']]
 ];
 
 const ENEMY_STATS = {
@@ -373,12 +381,15 @@ const ENEMY_STATS = {
   armored:{hp:14,speed:50,score:450,r:24,fire:2.6,color:'#a0a0a0'},
   elite:{hp:6,speed:130,score:350,r:16,fire:1.2,color:'#d060d0'},
   shielded:{hp:6,speed:70,score:350,r:20,fire:2.2,color:'#aaccff',shield:3},
-  asteroid:{hp:3,speed:90,score:80,r:20,fire:0,color:'#a08060'}
+  asteroid:{hp:3,speed:90,score:80,r:20,fire:0,color:'#a08060'},
+  flanker:{hp:7,speed:145,score:280,r:17,fire:1.65,color:'#55d6c2'},
+  disruptor:{hp:9,speed:82,score:390,r:19,fire:1.45,color:'#d77cff'},
+  carrier:{hp:22,speed:42,score:650,r:29,fire:2.0,color:'#e0a64f'}
 };
 
 function buildWaveQueue(stageIdx, waveIdx){
   const s = Math.min(stageIdx, WAVE_POOLS.length-1);
-  const w = Math.min(waveIdx, 1);
+  const w = Math.min(waveIdx, 2);
   return WAVE_POOLS[s][w].slice();
 }
 
@@ -734,7 +745,7 @@ const Game = {
       x: positions[i].x,
       y: positions[i].y
     }));
-    this.spawnTimer = 0.25; this.waveState = 'active';
+    this.spawnTimer = Math.max(0.16, 0.30 - this.stageIndex*0.012); this.waveState = 'active';
     this.flashMsg = 'ONDA '+(this.waveIndex+1); this.flashTimer = 1.2;
   },
 
@@ -862,7 +873,7 @@ const Game = {
         if(this.spawnTimer<=0){
           const spawn = this.spawnQueue.shift();
           this.spawnEnemy(spawn.type, spawn.x, spawn.y);
-          this.spawnTimer = 0.3;
+          this.spawnTimer = Math.max(0.16, 0.30 - this.stageIndex*0.012);
         }
       }
       if(this.spawnQueue.length===0 && this.enemies.length===0){
@@ -1102,8 +1113,10 @@ const Game = {
       x: x !== undefined ? x : rand(40,W-40),
       y: y !== undefined ? y : -40,
       vx:0, vy:s.speed,
-      hp:s.hp, maxHp:s.hp,
-      shield: s.shield || 0, maxShield: s.shield || 0,
+      hp:Math.ceil(s.hp * (1 + this.stageIndex*0.075)),
+      maxHp:Math.ceil(s.hp * (1 + this.stageIndex*0.075)),
+      shield: Math.ceil((s.shield || 0) * (1 + this.stageIndex*0.06)),
+      maxShield: Math.ceil((s.shield || 0) * (1 + this.stageIndex*0.06)),
       r:s.r, color:s.color,
       fireTimer:rand(0.5,1.5), fireInterval:s.fire, age:0, dead:false,
       pattern: type==='interceptor'?'dive':(type==='elite'?'strafe':'normal'),
@@ -1130,6 +1143,15 @@ const Game = {
     } else if(e.type === 'weaver'){
       e.y += e.vy * ldt;
       e.x += Math.sin(e.age*3) * 200 * ldt;
+    } else if(e.type === 'flanker'){
+      e.y += e.vy * 0.72 * ldt;
+      e.x += Math.sin(e.age*3.8 + e.drift)*250*ldt;
+    } else if(e.type === 'disruptor'){
+      e.y += e.vy * 0.65 * ldt;
+      e.x += Math.sin(e.age*1.7)*105*ldt;
+    } else if(e.type === 'carrier'){
+      e.y += e.vy * 0.7 * ldt;
+      e.x += Math.sin(e.age*1.1)*70*ldt;
     } else if(e.pattern==='dive'){ e.y+=e.vy*ldt; e.x+=Math.sin(e.age*3+e.x*0.01)*80*ldt; }
     else if(e.pattern==='strafe'){ e.y+=e.vy*0.4*ldt; e.x+=Math.sin(e.age*2)*160*ldt; }
     else { e.y+=e.vy*ldt; e.x+=e.drift*ldt; }
@@ -1156,6 +1178,15 @@ const Game = {
     else if(e.type==='elite'){ const a=ang+rand(-0.1,0.1); this.enemyBullets.push({x:e.x,y:e.y+8,vx:Math.cos(a)*280,vy:Math.sin(a)*280,r:4,color:'#ff66ff'}); }
     else if(e.type==='armored'){ for(let i=0;i<3;i++){ const a=ang+(i-1)*0.4; this.enemyBullets.push({x:e.x,y:e.y+8,vx:Math.cos(a)*220,vy:Math.sin(a)*220,r:5,color:'#ffcc44'}); } }
     else if(e.type==='shielded'){ for(let i=-1;i<=1;i++){ const a=ang+i*0.2; this.enemyBullets.push({x:e.x,y:e.y+10,vx:Math.cos(a)*240,vy:Math.sin(a)*240,r:5,color:'#aaccff'}); } }
+    else if(e.type==='flanker'){
+      for(let i=-1;i<=1;i++){ const a=ang+i*0.34; this.enemyBullets.push({x:e.x,y:e.y+8,vx:Math.cos(a)*270,vy:Math.sin(a)*270,r:4,color:'#55d6c2'}); }
+    }
+    else if(e.type==='disruptor'){
+      for(let i=0;i<5;i++){ const a=ang+(i-2)*0.16; this.enemyBullets.push({x:e.x,y:e.y+8,vx:Math.cos(a)*245,vy:Math.sin(a)*245,r:5,color:'#d77cff'}); }
+    }
+    else if(e.type==='carrier'){
+      for(let i=0;i<5;i++){ const a=Math.PI/2+(i-2)*0.28; this.enemyBullets.push({x:e.x,y:e.y+12,vx:Math.cos(a)*210,vy:Math.sin(a)*210,r:6,color:'#ffb347'}); }
+    }
   },
 
   killEnemy(e){
@@ -1179,8 +1210,8 @@ const Game = {
       final:    {name:'NÚCLEO ALIENÍGENA', hp:320, r:66, color:'#5affaa', patterns:['circle','laser','homing','spread5','aimed']}
     };
     const cfg = cfgMap[name];
-    const scale = 1 + (stageIdx || 0) * 0.22;
-    const hp = Math.floor(cfg.hp * scale);
+    const stageHp = [150, 220, 340, 480, 650, 850, 1100, 1400];
+    const hp = stageHp[stageIdx] || Math.floor(cfg.hp * (1 + (stageIdx || 0) * 0.30));
     this.boss = {
       type:name,
       name:cfg.name, x:W/2, y:-80, hp, maxHp:hp, r:cfg.r, color:cfg.color,
@@ -1204,7 +1235,8 @@ const Game = {
     b.angle += ldt;
     b.attackTimer -= ldt;
     if(b.attackTimer<=0){
-      b.attackTimer = [2.0,1.5,1.1][b.phase];
+      const stagePressure = Math.min(0.28, this.stageIndex*0.035);
+      b.attackTimer = Math.max(0.62, [2.0,1.5,1.1][b.phase] - stagePressure);
       const pat = b.patterns[b.attackIndex % b.patterns.length];
       b.attackIndex++;
       this.bossAttack(pat);
@@ -1907,6 +1939,26 @@ const Game = {
       ctx.fillStyle='rgba(40,30,20,0.6)';
       ctx.beginPath(); ctx.arc(-5,-3,3,0,TAU); ctx.fill();
       ctx.beginPath(); ctx.arc(6,4,4,0,TAU); ctx.fill();
+    } else if(e.type==='flanker' || e.type==='disruptor' || e.type==='carrier'){
+      const col = e.type==='flanker' ? '#55d6c2' : e.type==='disruptor' ? '#d77cff' : '#e0a64f';
+      ctx.rotate(e.type==='flanker' ? Math.sin(e.age*4)*0.35 : e.age*0.25);
+      ctx.fillStyle = e.type==='carrier' ? '#59401f' : '#20243c';
+      ctx.beginPath();
+      if(e.type==='carrier'){
+        ctx.moveTo(0,27); ctx.lineTo(-25,12); ctx.lineTo(-30,-12); ctx.lineTo(-15,-24);
+        ctx.lineTo(15,-24); ctx.lineTo(30,-12); ctx.lineTo(25,12);
+      } else {
+        ctx.moveTo(0,20); ctx.lineTo(-20,0); ctx.lineTo(-12,-18); ctx.lineTo(0,-10);
+        ctx.lineTo(12,-18); ctx.lineTo(20,0);
+      }
+      ctx.closePath(); ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle=col; ctx.globalAlpha=0.85;
+      ctx.beginPath(); ctx.arc(0,0,e.type==='carrier'?8:5,0,TAU); ctx.fill();
+      ctx.globalAlpha=1;
+      if(e.type==='carrier'){
+        ctx.strokeStyle='#ffd58a'; ctx.lineWidth=2;
+        ctx.strokeRect(-18,-10,36,20);
+      }
     }
     ctx.restore();
 
@@ -2301,7 +2353,8 @@ const Game = {
     ctx.fillText('SETOR '+setorNum+' · '+setorName, W/2, 20);
     ctx.fillStyle='#8fd4ff'; ctx.font='11px "Segoe UI", Arial';
     const totalQ = this.questionState.filter(q=>q.completed).length;
-    ctx.fillText('MISSÃO '+(this.stageIndex+1)+'/8 · CONCLUÍDAS: '+totalQ, W/2, 40);
+    const waveLabel = this.waveState==='boss' ? 'CHEFE' : 'ONDA '+Math.min(this.waveIndex+1,3)+'/3';
+    ctx.fillText('MISSÃO '+(this.stageIndex+1)+'/8 · '+waveLabel+' · CONCLUÍDAS: '+totalQ, W/2, 40);
 
     if(this.combo>1){
       ctx.fillStyle='#ffcc66'; ctx.font='bold 18px "Segoe UI", Arial'; ctx.textAlign='center';
