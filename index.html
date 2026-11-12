@@ -8,7 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;color:#e0e8f0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
 #game-container{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0a1030 0%,#000 100%);overflow:hidden}
-/* Wrapper preenchido inicialmente pelo viewport; JS ajusta para preservar proporção do mundo do jogo */
 #canvas-wrapper{position:relative;width:100vw;height:100vh}
 @supports (width: 100dvw){
   #canvas-wrapper{width:100dvw;height:100dvh}
@@ -79,9 +78,6 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
   .stat-box .v{font-size:16px}
 }
 
-/* ======================================================
-   FOCO VISUAL PARA NAVEGAÇÃO POR GAMEPAD
-   ====================================================== */
 .btn.focused, .q-option.focused {
   outline: 3px solid #8fd4ff;
   outline-offset: 3px;
@@ -217,9 +213,6 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
 
 /* ============================================================
    DIMENSÕES DINÂMICAS DO MUNDO DO JOGO
-   Base 960x600. A dimensão "sobrando" é expandida conforme a
-   proporção real do viewport (com limites seguros). Isso remove
-   as tarjas pretas em telas 16:9 e mobile landscape.
    ============================================================ */
 let W = 960, H = 600;
 const BASE_W = 960, BASE_H = 600;
@@ -262,24 +255,20 @@ function resizeCanvas(){
   const changed = (dims.w !== W || dims.h !== H);
   W = dims.w; H = dims.h;
 
-  // Dimensiona wrapper preservando a proporção do mundo do jogo
   const wrapper = document.getElementById('canvas-wrapper');
   const wrapperAspect = W / H;
   const containerAspect = cr.width / cr.height;
   let wW, wH;
   if(containerAspect > wrapperAspect){
-    // Container mais largo → altura é limitante
     wH = cr.height;
     wW = Math.round(cr.height * wrapperAspect);
   } else {
-    // Container mais alto → largura é limitante
     wW = cr.width;
     wH = Math.round(cr.width / wrapperAspect);
   }
   wrapper.style.width = wW + 'px';
   wrapper.style.height = wH + 'px';
 
-  // Buffer de pixel do canvas (resolução nítida com DPR, limitado para performance)
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   let pixelW = Math.round(wW * dpr);
   let pixelH = Math.round(wH * dpr);
@@ -297,7 +286,6 @@ function resizeCanvas(){
   ctx.imageSmoothingEnabled = true;
 
   if(changed){
-    // Recalcula campo de estrelas para o novo tamanho
     if(typeof Game !== 'undefined' && Game.stars){
       Game.stars = [];
       const count = Math.max(180, Math.round(W * H / 3200));
@@ -305,7 +293,6 @@ function resizeCanvas(){
         Game.stars.push({ x: rand(0,W), y: rand(0,H), z: rand(0.2,1), spd: rand(20,120) });
       }
     }
-    // Reajusta jogador para dentro dos novos limites
     if(typeof Game !== 'undefined' && Game.player){
       const p = Game.player;
       p.x = clamp(p.x, p.w/2, W - p.w/2);
@@ -389,7 +376,6 @@ const SPECIAL_NAMES = ['NOVA','LASER','TEMPO LENTO','OVERDRIVE','BURACO NEGRO','
    BANCO DE QUESTÕES — 48 QUESTÕES
    ============================================================ */
 const QUESTIONS = [
-/* UC3 — RECURSOS TECNOLÓGICOS (6) */
 {id:1, uc:'UC3', title:'PROTOCOLO DE ACESSO',
  context:'UC3 · Recursos tecnológicos no contexto social e do trabalho',
  text:'Um funcionário precisa verificar a quantidade de produtos disponíveis no estoque de um supermercado. Qual ferramenta pode auxiliá-lo nessa atividade?',
@@ -435,7 +421,6 @@ const QUESTIONS = [
  correctFeedback:'Correto! Planilhas eletrônicas organizam dados como quantidades, lotes e datas de validade, apoiando o controle da operação.',
  wrongFeedback:'A afirmação é verdadeira. Planilhas eletrônicas são ferramentas úteis para organizar quantidades, lotes e datas de validade.'},
 
-/* UC7 — ORIENTAÇÃO E ATENDIMENTO (8) */
 {id:7, uc:'UC7', title:'RADAR DE CLIENTE',
  context:'UC7 · Orientar clientes em relação às mercadorias, produtos e serviços',
  text:'Um cliente procura determinado produto, mas não sabe em qual corredor encontrá-lo. Qual deve ser a atitude do funcionário?',
@@ -499,7 +484,6 @@ const QUESTIONS = [
  correctFeedback:'Correto! Cordialidade e respeito devem ser oferecidos a todos os clientes, sem distinção.',
  wrongFeedback:'A atitude correta é tratar todos os clientes com cordialidade, independentemente de aparência, origem ou qualquer outra característica.'},
 
-/* UC8 — ABASTECER O PONTO DE VENDA (12) */
 {id:15, uc:'UC8', title:'REPOSIÇÃO DE GÔNDOLA',
  context:'UC8 · Abastecer o ponto de venda',
  text:'Um produto está acabando na gôndola, mas ainda existem caixas disponíveis no estoque. O que o funcionário deve fazer?',
@@ -593,7 +577,6 @@ const QUESTIONS = [
  correctFeedback:'Correto! O abastecimento garante disponibilidade, organização e boas condições dos produtos para o cliente.',
  wrongFeedback:'O objetivo é garantir que os produtos estejam disponíveis, organizados e em condições adequadas para o cliente.'},
 
-/* UC10 — COMUNICAÇÃO E VENDAS (8) */
 {id:27, uc:'UC10', title:'CLIENTE INDECISO',
  context:'UC10 · A arte de se comunicar e de vender mais',
  text:'Um cliente está indeciso entre dois produtos semelhantes. Como o funcionário pode ajudá-lo?',
@@ -655,7 +638,6 @@ const QUESTIONS = [
  correctFeedback:'Correto! Calma, registro organizado e respeito são marcas de profissionalismo. Compartilhar dados sigilosos de clientes é uma falha grave.',
  wrongFeedback:'Usar informações sigilosas de clientes em conversas informais é inadequado. O correto é manter a calma, registrar informações e tratar todos com respeito.'},
 
-/* UC11 — LOGÍSTICA NO VAREJO (7) */
 {id:35, uc:'UC11', title:'RECEBIMENTO SEGURO',
  context:'UC11 · Logística nas operações de varejo',
  text:'Durante o recebimento de mercadorias, qual procedimento é importante?',
@@ -709,7 +691,6 @@ const QUESTIONS = [
  correctFeedback:'Correto! Utilizar equipamentos adequados e respeitar limites de carga e segurança protege as pessoas e as mercadorias.',
  wrongFeedback:'O correto é utilizar equipamentos adequados e respeitar os limites de carga e segurança durante o transporte interno.'},
 
-/* UC12 — PREVENÇÃO DE PERDAS (7) */
 {id:42, uc:'UC12', title:'AVARIA DETECTADA',
  context:'UC12 · Prevenção de perdas',
  text:'Um funcionário identifica produtos com embalagens danificadas no estoque. Qual deve ser sua atitude?',
@@ -914,9 +895,11 @@ function buildFormationPositions(formation, n){
   return positions;
 }
 
-// ---------- Layout Touch (dinâmico) ----------
-const JOY_OFFSET_X = 85;      // distância (em unidades de jogo) da borda esquerda
-const JOY_OFFSET_Y = 85;      // distância (em unidades de jogo) da borda inferior
+// ---------- Layout Touch (dinâmico, corrigido) ----------
+// Offsets preferenciais. O layout final garante espaço para a deflexão
+// completa do knob sem que ele encoste/corte na borda da tela.
+const JOY_OFFSET_X = 95;
+const JOY_OFFSET_Y = 145;
 let joyCenterCSS = { x: 100, y: 100 };
 let joyMaxRadiusCSS = 50;
 
@@ -926,23 +909,29 @@ function updateTouchLayout(){
   const cr = canvas.getBoundingClientRect();
   if(cr.width === 0 || cr.height === 0){ base.style.display = 'none'; return; }
 
-  // Tamanho proporcional ao menor lado do canvas (funciona em telas pequenas)
+  // Tamanho proporcional ao menor lado do canvas
   const joySize = Math.max(90, Math.min(160, Math.min(cr.width, cr.height) * 0.28));
   const knobSize = Math.max(36, joySize * 0.46);
   const margin = 8;
   const half = joySize / 2;
+  const knobHalf = knobSize / 2;
+  const deflectRadius = joySize * 0.42;
 
-  // Posição-alvo em coords de jogo convertida para CSS
-  let left = (JOY_OFFSET_X / W) * cr.width;
-  let top  = ((H - JOY_OFFSET_Y) / H) * cr.height;
+  // Distância mínima de cada borda para que o knob, ao ser defletido
+  // totalmente, permaneça inteiro dentro do canvas (com margem).
+  const minFromEdge = deflectRadius + knobHalf + margin + 12;
 
-  // Clamp: nunca sai do canvas
+  // Posição preferencial (offsets) — nunca menor que a distância mínima
+  let left = Math.max(minFromEdge, (JOY_OFFSET_X / W) * cr.width);
+  let top  = cr.height - Math.max(minFromEdge, (JOY_OFFSET_Y / H) * cr.height);
+
+  // Garante que a base (que também tem raio) permaneça dentro do canvas
   left = Math.max(half + margin, Math.min(cr.width - half - margin, left));
   top  = Math.max(half + margin, Math.min(cr.height - half - margin, top));
 
   joyCenterCSS.x = left;
   joyCenterCSS.y = top;
-  joyMaxRadiusCSS = joySize * 0.42;
+  joyMaxRadiusCSS = deflectRadius;
 
   base.style.width = joySize + 'px';
   base.style.height = joySize + 'px';
@@ -1043,7 +1032,6 @@ const Input = {
           Game.togglePause(); e.preventDefault(); continue;
         }
         if(this.touch.joyActive) continue;
-        // Região de ativação do analógico (canto inferior esquerdo)
         const cssX = t.clientX - cr.left;
         const cssY = t.clientY - cr.top;
         if(cssX < cr.width * 0.42 && cssY > cr.height * 0.42){
