@@ -8,9 +8,10 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;color:#e0e8f0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
 #game-container{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0a1030 0%,#000 100%);overflow:hidden}
-#canvas-wrapper{position:relative;width:min(100vw,calc(100vh * 960 / 600));height:min(100vh,calc(100vw * 600 / 960));max-width:100%;max-height:100%}
+/* Wrapper preenchido inicialmente pelo viewport; JS ajusta para preservar proporção do mundo do jogo */
+#canvas-wrapper{position:relative;width:100vw;height:100vh}
 @supports (width: 100dvw){
-  #canvas-wrapper{width:min(100dvw,calc(100dvh * 960 / 600));height:min(100dvh,calc(100dvw * 600 / 960))}
+  #canvas-wrapper{width:100dvw;height:100dvh}
 }
 #game{display:block;width:100%;height:100%;touch-action:none;background:#000;border:1px solid rgba(80,160,255,.25);box-shadow:0 0 40px rgba(50,120,255,.15)}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:18px 22px;background:rgba(2,5,15,.94);z-index:10;overflow-y:auto;text-align:center}
@@ -54,8 +55,6 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
 #joy-base{position:absolute;width:130px;height:130px;border-radius:50%;border:2px solid rgba(120,200,255,.5);background:rgba(30,60,120,.22);display:none;pointer-events:none;transform:translate(-50%,-50%);opacity:0.45;transition:opacity 0.12s}
 #joy-knob{position:absolute;width:60px;height:60px;border-radius:50%;background:rgba(90,170,255,.6);border:2px solid rgba(160,220,255,.9);pointer-events:none;transform:translate(-50%,-50%);display:none;box-shadow:0 0 18px rgba(80,180,255,.55)}
 @media (max-height:450px){
-  #joy-base{width:105px;height:105px}
-  #joy-knob{width:48px;height:48px}
   #fire-btn{width:72px;height:72px;right:18px;bottom:20px;font-size:11px}
   #special-btn{width:56px;height:56px;right:100px;bottom:28px;font-size:8px}
 }
@@ -215,24 +214,105 @@ html,body{width:100%;height:100%;background:#04060f;overflow:hidden;font-family:
    Banco de 48 questões · UC3, UC7, UC8, UC10, UC11, UC12
    Suporte integral a joystick/gamepad em todas as telas
    ============================================================ */
-const W = 960, H = 600;
+
+/* ============================================================
+   DIMENSÕES DINÂMICAS DO MUNDO DO JOGO
+   Base 960x600. A dimensão "sobrando" é expandida conforme a
+   proporção real do viewport (com limites seguros). Isso remove
+   as tarjas pretas em telas 16:9 e mobile landscape.
+   ============================================================ */
+let W = 960, H = 600;
+const BASE_W = 960, BASE_H = 600;
+const MAX_GAME_W = 1500, MAX_GAME_H = 720;
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+function computeGameDimensions(vw, vh){
+  if(vw < 10 || vh < 10) return { w: BASE_W, h: BASE_H };
+  const aspect = vw / vh;
+  const baseAspect = BASE_W / BASE_H;
+  let gw, gh;
+  if(aspect >= baseAspect){
+    gh = BASE_H;
+    gw = Math.round(BASE_H * aspect);
+  } else {
+    gw = BASE_W;
+    gh = Math.round(BASE_W / aspect);
+  }
+  if(gw > MAX_GAME_W){
+    const s = MAX_GAME_W / gw;
+    gw = MAX_GAME_W;
+    gh = Math.round(gh * s);
+  }
+  if(gh > MAX_GAME_H){
+    const s = MAX_GAME_H / gh;
+    gh = MAX_GAME_H;
+    gw = Math.round(gw * s);
+  }
+  return { w: gw, h: gh };
+}
+
 function resizeCanvas(){
-  const rect = canvas.getBoundingClientRect();
-  if(rect.width === 0 || rect.height === 0) return;
+  const container = document.getElementById('game-container');
+  const cr = container.getBoundingClientRect();
+  if(cr.width < 10 || cr.height < 10) return;
+
+  const dims = computeGameDimensions(cr.width, cr.height);
+  const changed = (dims.w !== W || dims.h !== H);
+  W = dims.w; H = dims.h;
+
+  // Dimensiona wrapper preservando a proporção do mundo do jogo
+  const wrapper = document.getElementById('canvas-wrapper');
+  const wrapperAspect = W / H;
+  const containerAspect = cr.width / cr.height;
+  let wW, wH;
+  if(containerAspect > wrapperAspect){
+    // Container mais largo → altura é limitante
+    wH = cr.height;
+    wW = Math.round(cr.height * wrapperAspect);
+  } else {
+    // Container mais alto → largura é limitante
+    wW = cr.width;
+    wH = Math.round(cr.width / wrapperAspect);
+  }
+  wrapper.style.width = wW + 'px';
+  wrapper.style.height = wH + 'px';
+
+  // Buffer de pixel do canvas (resolução nítida com DPR, limitado para performance)
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let pixelW = Math.round(rect.width * dpr);
-  let pixelH = Math.round(pixelW * H / W);
-  if(pixelW > 2400){ pixelW = 2400; pixelH = Math.round(pixelW * H / W); }
+  let pixelW = Math.round(wW * dpr);
+  let pixelH = Math.round(wH * dpr);
+  if(pixelW > 2600){
+    const s = 2600 / pixelW;
+    pixelW = 2600;
+    pixelH = Math.round(pixelH * s);
+  }
   if(canvas.width !== pixelW || canvas.height !== pixelH){
     canvas.width = pixelW;
     canvas.height = pixelH;
-    const sx = pixelW / W, sy = pixelH / H;
-    ctx.setTransform(sx, 0, 0, sy, 0, 0);
-    ctx.imageSmoothingEnabled = true;
   }
+  const sx = pixelW / W, sy = pixelH / H;
+  ctx.setTransform(sx, 0, 0, sy, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+
+  if(changed){
+    // Recalcula campo de estrelas para o novo tamanho
+    if(typeof Game !== 'undefined' && Game.stars){
+      Game.stars = [];
+      const count = Math.max(180, Math.round(W * H / 3200));
+      for(let i=0;i<count;i++){
+        Game.stars.push({ x: rand(0,W), y: rand(0,H), z: rand(0.2,1), spd: rand(20,120) });
+      }
+    }
+    // Reajusta jogador para dentro dos novos limites
+    if(typeof Game !== 'undefined' && Game.player){
+      const p = Game.player;
+      p.x = clamp(p.x, p.w/2, W - p.w/2);
+      p.y = clamp(p.y, 80, H - p.h/2);
+    }
+  }
+
   updateTouchLayout();
 }
 window.addEventListener('resize', resizeCanvas);
@@ -834,18 +914,44 @@ function buildFormationPositions(formation, n){
   return positions;
 }
 
-// ---------- Layout Touch ----------
-const JOY_BASE_GAME_X = 85;
-const JOY_BASE_GAME_Y = H - 85;
-const JOY_MAX_RADIUS = 55;
+// ---------- Layout Touch (dinâmico) ----------
+const JOY_OFFSET_X = 85;      // distância (em unidades de jogo) da borda esquerda
+const JOY_OFFSET_Y = 85;      // distância (em unidades de jogo) da borda inferior
+let joyCenterCSS = { x: 100, y: 100 };
+let joyMaxRadiusCSS = 50;
 
 function updateTouchLayout(){
   const base = document.getElementById('joy-base');
+  const knob = document.getElementById('joy-knob');
   const cr = canvas.getBoundingClientRect();
-  if(cr.width === 0){ base.style.display = 'none'; return; }
-  base.style.left = (JOY_BASE_GAME_X / W * cr.width) + 'px';
-  base.style.top = (JOY_BASE_GAME_Y / H * cr.height) + 'px';
+  if(cr.width === 0 || cr.height === 0){ base.style.display = 'none'; return; }
+
+  // Tamanho proporcional ao menor lado do canvas (funciona em telas pequenas)
+  const joySize = Math.max(90, Math.min(160, Math.min(cr.width, cr.height) * 0.28));
+  const knobSize = Math.max(36, joySize * 0.46);
+  const margin = 8;
+  const half = joySize / 2;
+
+  // Posição-alvo em coords de jogo convertida para CSS
+  let left = (JOY_OFFSET_X / W) * cr.width;
+  let top  = ((H - JOY_OFFSET_Y) / H) * cr.height;
+
+  // Clamp: nunca sai do canvas
+  left = Math.max(half + margin, Math.min(cr.width - half - margin, left));
+  top  = Math.max(half + margin, Math.min(cr.height - half - margin, top));
+
+  joyCenterCSS.x = left;
+  joyCenterCSS.y = top;
+  joyMaxRadiusCSS = joySize * 0.42;
+
+  base.style.width = joySize + 'px';
+  base.style.height = joySize + 'px';
+  base.style.left = left + 'px';
+  base.style.top = top + 'px';
   base.style.display = (Game.touchEnabled && Input.isTouch) ? 'block' : 'none';
+
+  knob.style.width = knobSize + 'px';
+  knob.style.height = knobSize + 'px';
 }
 
 /* ============================================================
@@ -856,12 +962,11 @@ const Input = {
   justPressed:{}, gamepadIndex:null, gamepadPrev:{},
   touch:{ joyActive:false, joyId:null, fireId:null, specialId:null },
   isTouch:false,
-  // Estado de navegação de UI via gamepad
   hasGamepad:false,
-  uiDir:null,       // 'up'|'down'|'left'|'right' (com repetição)
-  uiA:false,        // edge do botão A (0)
-  uiB:false,        // edge do botão B (1)
-  uiStart:false,    // edge do botão Start (9)
+  uiDir:null,
+  uiA:false,
+  uiB:false,
+  uiStart:false,
   _prevA:false, _prevB:false, _prevStart:false,
   _lastDir:null, _navAccum:0, _navFirstRepeat:true,
 
@@ -938,18 +1043,15 @@ const Input = {
           Game.togglePause(); e.preventDefault(); continue;
         }
         if(this.touch.joyActive) continue;
+        // Região de ativação do analógico (canto inferior esquerdo)
         const cssX = t.clientX - cr.left;
         const cssY = t.clientY - cr.top;
-        const gameX = cssX / cr.width * W;
-        const gameY = cssY / cr.height * H;
-        if(gameX < W * 0.42 && gameY > H * 0.42){
+        if(cssX < cr.width * 0.42 && cssY > cr.height * 0.42){
           this.touch.joyActive = true;
           this.touch.joyId = t.identifier;
           joyBase.style.opacity = '1';
-          const bx = (JOY_BASE_GAME_X / W * cr.width);
-          const by = (JOY_BASE_GAME_Y / H * cr.height);
-          joyKnob.style.left = bx + 'px';
-          joyKnob.style.top = by + 'px';
+          joyKnob.style.left = joyCenterCSS.x + 'px';
+          joyKnob.style.top  = joyCenterCSS.y + 'px';
           joyKnob.style.display = 'block';
           e.preventDefault();
         }
@@ -963,18 +1065,16 @@ const Input = {
         if(t.identifier===this.touch.joyId){
           const cssX = t.clientX - cr.left;
           const cssY = t.clientY - cr.top;
-          const gameX = cssX / cr.width * W;
-          const gameY = cssY / cr.height * H;
-          let dx = gameX - JOY_BASE_GAME_X;
-          let dy = gameY - JOY_BASE_GAME_Y;
+          let dx = cssX - joyCenterCSS.x;
+          let dy = cssY - joyCenterCSS.y;
           const d = Math.hypot(dx,dy);
-          const max = JOY_MAX_RADIUS;
+          const max = joyMaxRadiusCSS;
           if(d>max){ dx=dx/d*max; dy=dy/d*max; }
           this.touch.joyDX = dx/max; this.touch.joyDY = dy/max;
-          const kx = (JOY_BASE_GAME_X + dx) / W * cr.width;
-          const ky = (JOY_BASE_GAME_Y + dy) / H * cr.height;
+          const kx = joyCenterCSS.x + dx;
+          const ky = joyCenterCSS.y + dy;
           joyKnob.style.left = kx + 'px';
-          joyKnob.style.top = ky + 'px';
+          joyKnob.style.top  = ky + 'px';
           e.preventDefault();
         }
       }
@@ -1055,7 +1155,6 @@ const Input = {
 
     this.defense = !!(this.keys['Shift'] || gPrecision);
 
-    // ===== UI Navigation State (para todas as telas) =====
     this.hasGamepad = false;
     this.uiDir = null;
     this.uiA = false;
@@ -1064,8 +1163,6 @@ const Input = {
 
     if(gp){
       this.hasGamepad = true;
-
-      // D-pad (prioridade) + analógico (fallback)
       let dx = 0, dy = 0;
       if(gp.buttons[12] && gp.buttons[12].pressed) dy = -1;
       if(gp.buttons[13] && gp.buttons[13].pressed) dy = 1;
@@ -1084,7 +1181,6 @@ const Input = {
       else if(dx < 0) newDir = 'left';
       else if(dx > 0) newDir = 'right';
 
-      // Repetição controlada
       if(newDir !== this._lastDir){
         this._lastDir = newDir;
         this._navAccum = 0;
@@ -1103,7 +1199,6 @@ const Input = {
         this._navFirstRepeat = true;
       }
 
-      // A / B / Start com detecção de borda
       const aNow = !!(gp.buttons[0] && gp.buttons[0].pressed);
       this.uiA = aNow && !this._prevA;
       this._prevA = aNow;
@@ -1129,7 +1224,7 @@ const Input = {
 };
 
 /* ============================================================
-   FOCUS MANAGER — navegação por gamepad em todas as telas
+   FOCUS MANAGER
    ============================================================ */
 const FocusManager = {
   items: [],
@@ -1143,7 +1238,6 @@ const FocusManager = {
     return null;
   },
 
-  // Reescaneia os focáveis da tela ativa preservando a chave do elemento focado
   refresh(){
     const screen = document.querySelector('.screen.active');
     if(!screen){ this.items = []; this.currentScreen = null; this.applyFocus(); return; }
@@ -1160,10 +1254,8 @@ const FocusManager = {
     if(screen.id === 'question-screen'){
       const hasContinue = screen.querySelector('#btn-q-continue');
       if(hasContinue){
-        // Questão já respondida — apenas botão de continuar
         focusables = [hasContinue];
       } else {
-        // Questão ativa — opções + botão de confirmar (se habilitado)
         focusables = [...qOpts, ...btns];
       }
     } else {
@@ -1218,7 +1310,6 @@ const FocusManager = {
     if(el.disabled) return;
     AudioSys.uiConfirm();
     el.click();
-    // Alguns cliques disparam re-render; agenda refresh para preservar foco
     setTimeout(() => this.refresh(), 60);
   },
 
@@ -1257,13 +1348,13 @@ const Game = {
 
   init(){
     this.stars = [];
-    for(let i=0;i<180;i++) this.stars.push({x:rand(0,W),y:rand(0,H),z:rand(0.2,1),spd:rand(20,120)});
+    const count = Math.max(180, Math.round(W * H / 3200));
+    for(let i=0;i<count;i++) this.stars.push({x:rand(0,W),y:rand(0,H),z:rand(0.2,1),spd:rand(20,120)});
     Input.init();
     resizeCanvas();
     this.bindUI();
     this.showScreen('menu');
     this.updateMenuRecord();
-    // Foco inicial após o menu aparecer
     setTimeout(() => FocusManager.refresh(), 50);
     requestAnimationFrame(t=>this.loop(t));
   },
@@ -1290,7 +1381,6 @@ const Game = {
       e.target.textContent = AudioSys.enabled ? '🔊' : '🔇';
     };
 
-    // Mouseover / clique → sincroniza foco (mouse e gamepad coexistem)
     document.addEventListener('mouseover', (e)=>{
       const target = e.target && e.target.closest ? e.target.closest('.btn, .q-option') : null;
       if(target && target.closest('.screen.active')){
@@ -1315,7 +1405,6 @@ const Game = {
     updateTouchLayout();
     document.getElementById('joy-knob').style.display = 'none';
     document.getElementById('joy-base').style.opacity = '0.45';
-    // Recalcula focáveis da nova tela
     setTimeout(()=>FocusManager.refresh(), 20);
   },
 
@@ -1428,7 +1517,6 @@ const Game = {
     else if(this.state==='paused'){ if(Input.consume('pause')){ this.resumeGame(); return; } }
     else if(this.state==='menu'){ if(Input.consume('enter')){ this.startGame(); return; } }
 
-    // Navegação por gamepad em TODAS as telas que não são de combate
     if(this.state !== 'playing') this.handleUIGamepad();
 
     if(this.state==='playing') this.updatePlaying(dt);
@@ -1441,8 +1529,6 @@ const Game = {
 
   handleUIGamepad(){
     if(!Input.hasGamepad) return;
-
-    // Prioriza ação sobre navegação para evitar duplo-trigger
     let handledAction = false;
     if(Input.uiA){
       FocusManager.activate();
@@ -1476,7 +1562,6 @@ const Game = {
       case 'victory':
         this.state='menu'; this.showScreen('menu'); this.updateMenuRecord();
         break;
-      // 'question' / 'menu': B não faz nada (pergunta obrigatória / sem menu anterior)
     }
   },
 
@@ -2259,10 +2344,8 @@ const Game = {
     const cont = document.getElementById('btn-q-continue');
     if(cont) cont.onclick = ()=>{ this.qLocked=true; setTimeout(()=>this.continueAfterQuestion(),200); };
 
-    // Recalcula foco após re-render
     setTimeout(() => {
       FocusManager.refresh();
-      // Em questões de escolha única, após selecionar, salta para CONFIRMAR
       if((q.type==='single' || q.type==='tf') && qs.selected.length > 0 && !qs.completed){
         const cf = document.getElementById('btn-q-confirm');
         if(cf && !cf.disabled) FocusManager.setFocusByElement(cf);
@@ -2371,7 +2454,6 @@ const Game = {
     document.getElementById('review-list').innerHTML = html;
   },
 
-  // ---------- Render ----------
   render(){
     this.drawBackground();
     this.drawStars();
